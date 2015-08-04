@@ -980,13 +980,6 @@ function LocalMenuLoadSynchronousTraceFcn(obj,event)
 % Load traces and movie timing
 handles=guidata(obj);
 
-% Ask user when the movie started
-handles.TraceStartTime=APinputdlg('Trace start time (sec)','Trace start');
-if isempty(handles.TraceStartTime)
-    return
-end
-handles.TraceStartTime=str2double(handles.TraceStartTime(1));
-
 % Load traces
 [filename,pathname,FilterIndex]=uigetfile('*.mat','Choose a MAT file with trace');
 if FilterIndex
@@ -1000,24 +993,38 @@ tempnames=fieldnames(temp);
 tempfirstname=strcat('temp.',tempnames{1});
 handles.SynchTrace=eval(tempfirstname);
 
+% WORKED WITH TXT FILES WITH TIMING DATA FROM HCIMAGE CIRCA 2008
 % Load trace timing file (txt, tab delimited, with one header row)
-[filename,pathname,FilterIndex]=uigetfile('*.txt','Choose a TXT file with trace timing');
+% [filename,pathname,FilterIndex]=uigetfile('*.txt','Choose a TXT file with trace timing');
+% if FilterIndex
+%     timingfile=fullfile(pathname,filename);
+% else
+%     return
+% end
+% handles.timingfile=timingfile;
+% tracetiming=dlmread(timingfile,'\t',1,0);
+% handles.TraceTiming=tracetiming(:,3:4);
+% handles.TraceStartTimes=handles.TraceTiming(:,1);
+% handles.MeanExposureTime=mean(handles.TraceTiming(:,2));
+% longframes = find(handles.TraceTiming(:,2) > handles.MeanExposureTime + (handles.MeanExposureTime / 2));
+% if longframes
+%     answer=inputdlg(sprintf('There are long frames at %d\nAdd how many frames?',longframes),'Long frames');
+%     FrameAdjust=str2double(answer);
+%     handles.TraceStartTimes(longframes:end) = handles.TraceStartTimes(longframes:end) + FrameAdjust*handles.MeanExposureTime;
+% end
+
+% Load trace timing file 
+[filename,pathname,FilterIndex]=uigetfile('*.mat','Choose a MAT file with trace timing');
 if FilterIndex
     timingfile=fullfile(pathname,filename);
 else
     return
 end
 handles.timingfile=timingfile;
-tracetiming=dlmread(timingfile,'\t',1,0);
-handles.TraceTiming=tracetiming(:,3:4);
-handles.TraceStartTimes=handles.TraceTiming(:,1);
-handles.MeanExposureTime=mean(handles.TraceTiming(:,2));
-longframes = find(handles.TraceTiming(:,2) > handles.MeanExposureTime + (handles.MeanExposureTime / 2));
-if longframes
-    answer=inputdlg(sprintf('There are long frames at %d\nAdd how many frames?',longframes),'Long frames');
-    FrameAdjust=str2double(answer);
-    handles.TraceStartTimes(longframes:end) = handles.TraceStartTimes(longframes:end) + FrameAdjust*handles.MeanExposureTime;
-end
+temp=load(timingfile);
+tempnames=fieldnames(temp);
+tempfirstname=strcat('temp.',tempnames{1});
+handles.TraceTiming=eval(tempfirstname);
 
 % Plot and return data to figure
 handles=PlotSynchronousTrace(handles);
@@ -1042,14 +1049,15 @@ else
     end
 end
 % plot regular
-% plot(handles.TraceStartTimes + handles.TraceStartTime,handles.SynchTrace);
+plot(handles.TraceTiming,handles.SynchTrace);
+xlim(get(handles.axeshandles(1),'xlim'));
 
 % plot unconnected dots
 % plot(handles.TraceStartTimes + handles.TraceStartTime,handles.SynchTrace,'LineStyle','none','Marker','.');
 
 % do a bar/stem/plot plot (works well with baseline subtracted traces)
-bar(handles.TraceStartTimes + handles.TraceStartTime + (handles.MeanExposureTime/2),handles.SynchTrace);
-xlim(get(handles.axeshandles(1),'XLim'))
+% bar(handles.TraceTiming,handles.SynchTrace);
+% xlim(get(handles.axeshandles(1),'XLim'))
 % ylim([1750 2100])
 
 
