@@ -10,6 +10,9 @@ handles.position = [0.2266    0.3359    0.5469    0.5469];
 
 if nargin==1;%assume input is the path to the file with the data to view
     handles.path=varargin{1};%save pathname into handles
+elseif nargin==2;
+    handles.path=varargin{1};
+    handles.rechunk=varargin{2};
 elseif nargin==0;%if no inputs
     [filename,pathname,FilterIndex]=uigetfile(handles.filetypes,'Choose a data file');
     if ~FilterIndex
@@ -85,6 +88,7 @@ catch
     channels=1;
     laserquest=0;
 end
+handles.chunkquest=chunkquest;
 % Find out which channels to plot
 if channels==1;
     [handles.includedchannels,ok]=listdlg('ListString',charcell,'PromptString','Plot which channels... All?',...
@@ -327,7 +331,7 @@ handles.sizedata = getappdata(handles.displayfig,'sizedata');
 % Scoot axes right side in so room for ticks
 % what's gonna happen to measure button?!?!
 % Handle pulse,target,iteration advancement correctly
-if chunkquest==1
+if chunkquest==1 || isfield(handles,'rechunk')
     button=questdlg('Do you want to chunkerize your data?','Chunkin'' time');
     if strcmp(button,'Yes')
         handles.ChunkMode=1;
@@ -863,8 +867,12 @@ end
 
 function LocalMenuReChunkerizeDataFcn(obj,event)
 handles=guidata(obj);
-handles=ChunkerizeData(handles);
-guidata(handles.displayfig,handles);%pass data back to the figure
+if handles.chunkquest==1
+    handles=ChunkerizeData(handles);
+    guidata(handles.displayfig,handles);%pass data back to the figure
+else
+    EphysViewer(handles.path,1);
+end
 
 function LocalMenuLoadFluorescentTracesFcn(obj,event)
 % Load traces, signals, and movie timing
