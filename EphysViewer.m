@@ -1779,11 +1779,11 @@ set(handles.VertMaxEditBox(ind),'String',num2str(newylims(2),3));
 function VertScaleOutFcn(obj,ev)
 
 handles=guidata(obj);%get general info from the figure
-if isempty(ev)
-    ind=find(handles.VertScaleOut==obj);%find number of axis to be changed
-else
-    ind=find(handles.axeshandles==obj);%find the axis to be changed
-end
+% if isempty(ev)
+%     ind=find(handles.VertScaleOut==obj);%find number of axis to be changed
+% else
+    ind=find(handles.VertScaleOut==obj);%find the axis to be changed
+% end
 
 ylims=get(handles.axeshandles(ind),'Ylim');
 m=mean(ylims);
@@ -1876,7 +1876,16 @@ handles=guidata(obj);
 point1 = get(handles.displayfig,'CurrentPoint'); % button down detected
 if strcmp(get(handles.displayfig,'SelectionType'),'normal');%if a left click
     A=ver;
-    LaterThanR2014b=any(strcmp(A(1).Release,{'(R2014b)' '(R2015a Prerelease)'}));
+    for i=1:length(A)
+        if strcmp(A(i).Name,'MATLAB')
+            MATLABfield=i;
+        end
+    end
+    val=str2num(A(MATLABfield).Version);
+    LaterThanR2014b=val>=8.4;
+    
+%     A=ver;
+%     LaterThanR2014b=any(strcmp(A(1).Release,{'(R2014b)' '(R2015a Prerelease)'}));
     if ismac
      if LaterThanR2014b
          useimrect=1;
