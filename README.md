@@ -8,3 +8,5 @@ EphysViewer.m is the main GUI.
 paq2lab.m imports data into the MATLAB workspace.
 
 ephysdefaults.m allows setting some basic preferences.
+
+PackIO and EphysViewer are released under the GNU General Public License.
